@@ -57,7 +57,7 @@ const (
 	List ValueCollectionType = "LIST"
 )
 
-//Sets the initial load mode. For more information, see [MapLoader and MapStore](https://docs.cloud.hazelcast.com/v1.1/docs/maploader-and-mapstore)
+//Sets the initial load mode. For more information, see [MapLoader and MapStore](https://docs.cloud.hazelcast.com/docs/maploader-and-mapstore)
 type InitialLoadMode string
 
 const (
