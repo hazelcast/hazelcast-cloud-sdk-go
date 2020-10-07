@@ -266,12 +266,12 @@ type Cluster struct {
 		//CIDR Range of the cluster network.
 		CidrBlock string `json:"cidrBlock"`
 		//Peering information of the cluster networking.
-		Peering struct {
+		PeeringInfo struct {
 			//This field is true if at least one peering connection established, false otherwise.
 			IsEnabled bool `json:"is_enabled"`
 		} `json:"peering"`
 		//Peering information of the cluster networking.
-		PrivateLink struct {
+		PrivateLinkInfo struct {
 			//State of the private link connection.
 			Url string `json:"url"`
 			//Url to cloud formation template that you can use for Private Link. For more information, see [AWS Private Link](https

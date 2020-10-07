@@ -75,7 +75,7 @@ func (c starterClusterServiceOp) List(ctx context.Context) (*[]models.Cluster, *
 	graphqlRequest := models.GraphqlRequest{
 		Name:      "clusters",
 		Operation: models.Query,
-		Input:     clusterList,
+		Input:     nil,
 		Args: models.ClusterListInput{
 			ProductType: models.Starter,
 		},

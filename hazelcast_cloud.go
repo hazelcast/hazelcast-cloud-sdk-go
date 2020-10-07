@@ -58,6 +58,7 @@ type Client struct {
 	InstanceType      InstanceTypeService
 	HazelcastVersion  HazelcastVersionService
 	Auth              AuthService
+	GcpPeering        GcpPeeringService
 
 	onRequestCompleted RequestCompletionCallback
 }
@@ -97,6 +98,7 @@ func NewClient(httpClient *http.Client, options ...Option) *Client {
 	c.AvailabilityZone = NewAvailabilityZoneService(c)
 	c.InstanceType = NewInstanceTypeService(c)
 	c.HazelcastVersion = NewHazelcastVersionService(c)
+	c.GcpPeering = NewGcpPeeringService(c)
 
 	for _, option := range options {
 		option(c)
