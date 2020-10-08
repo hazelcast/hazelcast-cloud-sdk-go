@@ -6,9 +6,10 @@ import (
 )
 
 type GcpPeeringService interface {
-	List(ctx context.Context, input *models.ListGcpPeeringInput) (*[]models.GcpPeering, *Response, error)
+	List(ctx context.Context, input *models.ListGcpPeeringsInput) (*[]models.GcpPeering, *Response, error)
 	Accept(ctx context.Context, input *models.AcceptGcpPeeringInput) (*models.Result, *Response, error)
 	Delete(ctx context.Context, input *models.DeleteGcpPeeringInput) (*models.Result, *Response, error)
+	GetProperties(ctx context.Context, input *models.GetGcpPeeringPropertiesInput) (*models.GcpPeeringProperties, *Response, error)
 }
 
 type gcpPeeringServiceOp struct {
@@ -19,7 +20,29 @@ func NewGcpPeeringService(client *Client) GcpPeeringService {
 	return &gcpPeeringServiceOp{client: client}
 }
 
-func (p gcpPeeringServiceOp) List(ctx context.Context, input *models.ListGcpPeeringInput) (*[]models.GcpPeering, *Response, error) {
+func (p gcpPeeringServiceOp) GetProperties(ctx context.Context, input *models.GetGcpPeeringPropertiesInput) (*models.GcpPeeringProperties, *Response, error) {
+	var peeringProperties models.GcpPeeringProperties
+	graphqlRequest := models.GraphqlRequest{
+		Name:      "getGcpPeeringProperties",
+		Operation: models.Query,
+		Input:     nil,
+		Args:      *input,
+		Response:  peeringProperties,
+	}
+	req, err := p.client.NewRequest(&graphqlRequest)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := p.client.Do(ctx, req, &peeringProperties)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return &peeringProperties, resp, err
+}
+
+func (p gcpPeeringServiceOp) List(ctx context.Context, input *models.ListGcpPeeringsInput) (*[]models.GcpPeering, *Response, error) {
 	var peeringList []models.GcpPeering
 	graphqlRequest := models.GraphqlRequest{
 		Name:      "listGcpPeerings",

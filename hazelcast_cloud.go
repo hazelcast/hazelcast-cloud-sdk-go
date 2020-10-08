@@ -59,6 +59,7 @@ type Client struct {
 	HazelcastVersion  HazelcastVersionService
 	Auth              AuthService
 	GcpPeering        GcpPeeringService
+	AzurePeering      AzurePeeringService
 
 	onRequestCompleted RequestCompletionCallback
 }
