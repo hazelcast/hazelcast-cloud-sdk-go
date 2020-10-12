@@ -20,10 +20,11 @@ func NewGcpPeeringService(client *Client) GcpPeeringService {
 	return &gcpPeeringServiceOp{client: client}
 }
 
+//This function returns needed properties to initialize Google Cloud Platform VPC Peering
 func (p gcpPeeringServiceOp) GetProperties(ctx context.Context, input *models.GetGcpPeeringPropertiesInput) (*models.GcpPeeringProperties, *Response, error) {
 	var peeringProperties models.GcpPeeringProperties
 	graphqlRequest := models.GraphqlRequest{
-		Name:      "getGcpPeeringProperties",
+		Name:      "gcpPeeringProperties",
 		Operation: models.Query,
 		Input:     nil,
 		Args:      *input,
@@ -42,10 +43,11 @@ func (p gcpPeeringServiceOp) GetProperties(ctx context.Context, input *models.Ge
 	return &peeringProperties, resp, err
 }
 
+//This function returns the list of Google Cloud Platform VPC Peerings for the cluster you specified in Input.
 func (p gcpPeeringServiceOp) List(ctx context.Context, input *models.ListGcpPeeringsInput) (*[]models.GcpPeering, *Response, error) {
 	var peeringList []models.GcpPeering
 	graphqlRequest := models.GraphqlRequest{
-		Name:      "listGcpPeerings",
+		Name:      "gcpPeerings",
 		Operation: models.Query,
 		Input:     nil,
 		Args:      *input,
@@ -64,6 +66,7 @@ func (p gcpPeeringServiceOp) List(ctx context.Context, input *models.ListGcpPeer
 	return &peeringList, resp, err
 }
 
+//This function accept Google Cloud Platform VPC Peering that comes from the specified parameters you provided in Input.
 func (p gcpPeeringServiceOp) Accept(ctx context.Context, input *models.AcceptGcpPeeringInput) (*models.Result, *Response, error) {
 	var peeringResult models.Result
 	graphqlRequest := models.GraphqlRequest{
@@ -86,7 +89,7 @@ func (p gcpPeeringServiceOp) Accept(ctx context.Context, input *models.AcceptGcp
 	return &peeringResult, resp, err
 }
 
-
+//This function deletes Google Cloud Platform VPC Peering for the peering you specified its ID in Input
 func (p gcpPeeringServiceOp) Delete(ctx context.Context, input *models.DeleteGcpPeeringInput) (*models.Result, *Response, error) {
 	var peeringResult models.Result
 	graphqlRequest := models.GraphqlRequest{

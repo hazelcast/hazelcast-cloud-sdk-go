@@ -15,11 +15,29 @@ import (
 	"github.com/hazelcast/hazelcast-cloud-sdk-go/models"
 	"google.golang.org/api/compute/v1"
 	"os"
+	"strconv"
 	"time"
 )
 
 func main() {
+	//GcpPeering(53878, "yunus-project","yunus-vpc")
+	AwsPeeringTest()
+}
 
+func AwsPeeringTest() {
+	client, _, clientErr := hazelcastcloud.NewFromCredentials(
+		os.Getenv("API_KEY"),
+		os.Getenv("API_SECRET"),
+		hazelcastcloud.OptionEndpoint("https://optimusprime.test.hazelcast.cloud/api/v1"),
+	)
+	if clientErr != nil {
+		panic(clientErr)
+	}
+		peeringProperties, _, propertiesErr := client.AwsPeering.GetProperties(context.Background(), &models.GetAwsPeeringPropertiesInput{
+		ClusterId: "53879",
+	})
+
+	fmt.Println(peeringProperties, propertiesErr)
 }
 
 func AzurePeering() {
@@ -117,7 +135,7 @@ func AzurePeering() {
 				AllowGatewayTransit:       &false,
 				UseRemoteGateways:         &false,
 				RemoteVirtualNetwork: &network.SubResource{
-					ID: &customerVnet,
+					ID: &customerVnetId,
 				},
 			},
 			Name: &hzPeerName,
@@ -148,7 +166,7 @@ func AzurePeering() {
 
 }
 
-func GcpPeering() {
+func GcpPeering(clusterId int, customerProject string, customerNetwork string) {
 	fmt.Println(time.Now().String())
 	client, _, clientErr := hazelcastcloud.NewFromCredentials(
 		os.Getenv("API_KEY"),
@@ -158,43 +176,41 @@ func GcpPeering() {
 	if clientErr != nil {
 		panic(clientErr)
 	}
-	fmt.Println(time.Now().String())
+
 	peeringProperties, _, propertiesErr := client.GcpPeering.GetProperties(context.Background(), &models.GetGcpPeeringPropertiesInput{
-		ClusterId: "53858",
+		ClusterId: strconv.Itoa(clusterId),
 	})
 	if propertiesErr != nil {
 		panic(propertiesErr)
 	}
-	fmt.Println(time.Now().String())
-	customerPeeringErr := createCustomerVpcPeering("yunus-project", "yunus-vpc", peeringProperties.ProjectId, peeringProperties.NetworkName)
-	if customerPeeringErr != nil {
-		panic(customerPeeringErr)
+	computeService, computeServiceErr := compute.NewService(context.Background())
+	if computeServiceErr != nil {
+		panic(computeServiceErr)
 	}
-	fmt.Println(time.Now().String())
+
+	_, addPeeringErr := computeService.Networks.AddPeering(customerProject, customerNetwork, &compute.NetworksAddPeeringRequest{
+		Name:             fmt.Sprintf("%s-%s", peeringProperties.ProjectId, peeringProperties.NetworkName),
+		PeerNetwork:      "https://www.googleapis.com/compute/v1/projects/" + peeringProperties.ProjectId + "/global/networks/" + peeringProperties.NetworkName,
+		AutoCreateRoutes: true,
+	}).Do()
+
+	if addPeeringErr != nil {
+		panic(addPeeringErr)
+	}
+
 	_, _, acceptErr := client.GcpPeering.Accept(context.Background(), &models.AcceptGcpPeeringInput{
-		ClusterId:   53858,
-		ProjectId:   "yunus-project",
-		NetworkName: "yunus-vpc",
+		ClusterId:   clusterId,
+		ProjectId:   customerProject,
+		NetworkName: customerNetwork,
 	})
 	if acceptErr != nil {
 		panic(acceptErr)
 	}
-	fmt.Println(time.Now().String())
-}
 
-func createCustomerVpcPeering(projectIdA string, networkNameA string, projectIdB string, networkNameB string) error {
-	computeService, computeServiceErr := compute.NewService(context.Background())
-	if computeServiceErr != nil {
-		return computeServiceErr
-	}
-	addPeeringRes, addPeeringErr := computeService.Networks.AddPeering(projectIdA, networkNameA, &compute.NetworksAddPeeringRequest{
-		Name:             fmt.Sprintf("from-%s-to-%s", projectIdA, projectIdB),
-		PeerNetwork:      "https://www.googleapis.com/compute/v1/projects/" + projectIdB + "/global/networks/" + networkNameB,
-		AutoCreateRoutes: true,
-	}).Do()
-	if addPeeringErr != nil {
-		return addPeeringErr
-	}
-	print(addPeeringRes)
-	return nil
+	list, _, _ := client.GcpPeering.List(context.Background(), &models.ListGcpPeeringsInput{ClusterId: strconv.Itoa(clusterId)})
+	asd, _, propertiesErr := client.GcpPeering.Delete(context.Background(), &models.DeleteGcpPeeringInput{Id: (*list)[0].Id})
+
+
+	fmt.Println(list,asd, clientErr)
+	fmt.Println(time.Now().String())
 }

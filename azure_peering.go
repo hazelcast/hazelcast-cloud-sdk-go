@@ -19,13 +19,14 @@ func NewAzurePeeringService(client *Client) AzurePeeringService {
 	return &azurePeeringServiceOp{client: client}
 }
 
+//This function returns needed properties to initialize Azure vNet Peering.
 func (p azurePeeringServiceOp) GetProperties(ctx context.Context, input *models.GetAzurePeeringPropertiesInput) (*models.AzurePeeringProperties, *Response, error) {
 	var peeringProperties models.AzurePeeringProperties
 	graphqlRequest := models.GraphqlRequest{
-		Name:      "getAzurePeeringProperties",
+		Name:      "azurePeeringProperties",
 		Operation: models.Query,
-		Input:     *input,
-		Args:      nil,
+		Input:     nil,
+		Args:      *input,
 		Response:  peeringProperties,
 	}
 	req, err := p.client.NewRequest(&graphqlRequest)
@@ -41,10 +42,11 @@ func (p azurePeeringServiceOp) GetProperties(ctx context.Context, input *models.
 	return &peeringProperties, resp, err
 }
 
+//This function returns the list of Azure vNet Peerings for the cluster you specified in Input.
 func (p azurePeeringServiceOp) List(ctx context.Context, input *models.ListAzurePeeringsInput) (*[]models.AzurePeering, *Response, error) {
 	var peeringList []models.AzurePeering
 	graphqlRequest := models.GraphqlRequest{
-		Name:      "listAzurePeerings",
+		Name:      "azurePeerings",
 		Operation: models.Query,
 		Input:     nil,
 		Args:      *input,
@@ -63,6 +65,7 @@ func (p azurePeeringServiceOp) List(ctx context.Context, input *models.ListAzure
 	return &peeringList, resp, err
 }
 
+//This function deletes Azure vNet Peering for the peering you specified its ID in Input.
 func (p azurePeeringServiceOp) Delete(ctx context.Context, input *models.DeleteAzurePeeringInput) (*models.Result, *Response, error) {
 	var peeringResult models.Result
 	graphqlRequest := models.GraphqlRequest{

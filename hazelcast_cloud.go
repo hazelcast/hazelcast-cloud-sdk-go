@@ -60,6 +60,7 @@ type Client struct {
 	Auth              AuthService
 	GcpPeering        GcpPeeringService
 	AzurePeering      AzurePeeringService
+	AwsPeering        AwsPeeringService
 
 	onRequestCompleted RequestCompletionCallback
 }
@@ -100,6 +101,8 @@ func NewClient(httpClient *http.Client, options ...Option) *Client {
 	c.InstanceType = NewInstanceTypeService(c)
 	c.HazelcastVersion = NewHazelcastVersionService(c)
 	c.GcpPeering = NewGcpPeeringService(c)
+	c.AzurePeering = NewAzurePeeringService(c)
+	c.AwsPeering = NewAwsPeeringService(c)
 
 	for _, option := range options {
 		option(c)
