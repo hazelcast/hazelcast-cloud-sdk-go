@@ -7,7 +7,7 @@ type ListGcpPeeringsInput struct {
 
 //Type of AcceptGcpPeeringInput input to initiate peering connection from Hazelcast to your Project
 type AcceptGcpPeeringInput struct {
-	ClusterId   int    `json:"clusterId"`
+	ClusterId   string `json:"clusterId"`
 	ProjectId   string `json:"projectId"`
 	NetworkName string `json:"networkName"`
 }
