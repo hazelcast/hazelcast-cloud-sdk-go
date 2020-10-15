@@ -6,7 +6,7 @@
 
 Hazelcast Cloud is a client library to consume Public API easily.
 
-You can view Hazelcast Cloud API references from here: [https://docs.cloud.hazelcast.com/v1.0/docs/api-reference](https://docs.cloud.hazelcast.com/v1.0/docs/api-reference)
+You can view Hazelcast Cloud API references from here: [https://docs.cloud.hazelcast.com/docs/api-reference](https://docs.cloud.hazelcast.com/docs/api-reference)
 
 ## Install
 ```sh
