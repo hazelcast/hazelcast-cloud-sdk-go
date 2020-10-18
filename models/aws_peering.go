@@ -7,7 +7,7 @@ type ListAwsPeeringsInput struct {
 
 //Type of AcceptAwsPeeringInput input to initiate peering connection from Hazelcast to your Project
 type AcceptAwsPeeringInput struct {
-	ClusterId   int    `json:"clusterId"`
+	ClusterId   string    `json:"clusterId"`
 	ProjectId   string `json:"projectId"`
 	NetworkName string `json:"networkName"`
 }
@@ -19,7 +19,11 @@ type DeleteAwsPeeringInput struct {
 
 //Type of AwsPeering list object
 type AwsPeering struct {
-	Id          string `json:"id"`
+	Id         string `json:"id"`
+	VpcId      string `json:"vpcId"`
+	VpcCidr    string `json:"vpcCidr"`
+	SubnetId   string `json:"subnetId"`
+	SubnetCidr string `json:"subnetCidr"`
 }
 
 //Type of AwsPeeringPropertiesInput to get properties
@@ -31,5 +35,5 @@ type GetAwsPeeringPropertiesInput struct {
 type AwsPeeringProperties struct {
 	VpcId   string `json:"vpcId"`
 	OwnerId string `json:"ownerId"`
-	Region string `json:"region"`
+	Region  string `json:"region"`
 }
