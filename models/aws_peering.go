@@ -7,13 +7,16 @@ type ListAwsPeeringsInput struct {
 
 //Type of AcceptAwsPeeringInput input to initiate peering connection from Hazelcast to your Project
 type AcceptAwsPeeringInput struct {
-	VpcId               string `json:"vpcId"`
-	VpcCidr             string `json:"vpcCidr"`
-	PeeringConnectionId string `json:"peeringConnectionId"`
-	Subnets             []struct {
-		SubnetId   string `json:"subnetId"`
-		SubnetCidr string `json:"subnetCidr"`
-	}
+	VpcId               string                            `json:"vpcId"`
+	VpcCidr             string                            `json:"vpcCidr"`
+	PeeringConnectionId string                            `json:"peeringConnectionId"`
+	Subnets             []AcceptAwsVpcPeeringInputSubnets `json:"subnets"`
+}
+
+//Type of AcceptAwsVpcPeeringInputSubnets input to initiate peering connection subnets field.
+type AcceptAwsVpcPeeringInputSubnets struct {
+	SubnetId   string `json:"subnetId"`
+	SubnetCidr string `json:"subnetCidr"`
 }
 
 //Type of DeleteAwsPeeringInput Input
