@@ -7,6 +7,7 @@ type ListAwsPeeringsInput struct {
 
 //Type of AcceptAwsPeeringInput input to initiate peering connection from Hazelcast to your Project
 type AcceptAwsPeeringInput struct {
+	ClusterId           string                            `json:"clusterId"`
 	VpcId               string                            `json:"vpcId"`
 	VpcCidr             string                            `json:"vpcCidr"`
 	PeeringConnectionId string                            `json:"peeringConnectionId"`
