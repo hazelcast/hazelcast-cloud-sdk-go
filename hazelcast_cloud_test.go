@@ -73,7 +73,7 @@ func TestNewFromCredentials(t *testing.T) {
 	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
 
 	//then
-	assert.Equal(t, "token", client.token)
+	assert.Equal(t, "token", client.Token)
 	server.Close()
 
 }
