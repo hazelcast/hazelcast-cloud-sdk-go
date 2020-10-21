@@ -49,6 +49,37 @@ func TestStarterClusterServiceOp_Create(t *testing.T) {
 	assert.False(t, (*clusterResponse).IsHotBackupEnabled)
 }
 
+func TestStarterClusterServiceOp_Fail_On_Create(t *testing.T) {
+	//given
+	serveMux := http.NewServeMux()
+	server := httptest.NewServer(serveMux)
+	defer server.Close()
+
+	serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if m := http.MethodPost; m != r.Method {
+			t.Errorf("Request method = %v, expected %v", r.Method, m)
+		}
+		var request GraphQLQuery
+		json.NewDecoder(r.Body).Decode(&request)
+
+		if strings.Contains(request.Query, "createStarterCluster") {
+			fmt.Fprint(w, `{"errors":[{"message":"500: Internal server error"}],"data":{"response":null}}`)
+		} else {
+			fmt.Fprint(w, `{"data":{"response":{"token":"token"}}}`)
+		}
+
+	})
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.CreateStarterClusterInput{}
+
+	//when
+	_, _, createErr := NewStarterClusterService(client).Create(context.TODO(), request)
+
+	//then
+	assert.NotNil(t, createErr)
+	assert.Contains(t, createErr.Error(), "500: Internal server error")
+}
+
 func TestStarterClusterServiceOp_Get(t *testing.T) {
 	//given
 	serveMux := http.NewServeMux()
@@ -86,6 +117,37 @@ func TestStarterClusterServiceOp_Get(t *testing.T) {
 	assert.False(t, (*clusterResponse).IsHotBackupEnabled)
 }
 
+func TestStarterClusterServiceOp_Fail_On_Get(t *testing.T) {
+	//given
+	serveMux := http.NewServeMux()
+	server := httptest.NewServer(serveMux)
+	defer server.Close()
+
+	serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if m := http.MethodPost; m != r.Method {
+			t.Errorf("Request method = %v, expected %v", r.Method, m)
+		}
+		var request GraphQLQuery
+		json.NewDecoder(r.Body).Decode(&request)
+
+		if strings.Contains(request.Query, "cluster") {
+			fmt.Fprint(w, `{"errors":[{"message":"500: Internal server error"}],"data":{"response":null}}`)
+		} else {
+			fmt.Fprint(w, `{"data":{"response":{"token":"token"}}}`)
+		}
+
+	})
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.GetStarterClusterInput{}
+
+	//when
+	_, _, getErr := NewStarterClusterService(client).Get(context.TODO(), request)
+
+	//then
+	assert.NotNil(t, getErr)
+	assert.Contains(t, getErr.Error(), "500: Internal server error")
+}
+
 func TestStarterClusterServiceOp_List(t *testing.T) {
 	//given
 	serveMux := http.NewServeMux()
@@ -113,6 +175,36 @@ func TestStarterClusterServiceOp_List(t *testing.T) {
 
 	//then
 	assert.Len(t, *(clusterResponses), 6)
+}
+
+func TestStarterClusterServiceOp_Fail_On_List(t *testing.T) {
+	//given
+	serveMux := http.NewServeMux()
+	server := httptest.NewServer(serveMux)
+	defer server.Close()
+
+	serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if m := http.MethodPost; m != r.Method {
+			t.Errorf("Request method = %v, expected %v", r.Method, m)
+		}
+		var request GraphQLQuery
+		json.NewDecoder(r.Body).Decode(&request)
+
+		if strings.Contains(request.Query, "cluster") {
+			fmt.Fprint(w, `{"errors":[{"message":"500: Internal server error"}],"data":{"response":null}}`)
+		} else {
+			fmt.Fprint(w, `{"data":{"response":{"token":"token"}}}`)
+		}
+
+	})
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+
+	//when
+	_, _, listErr := NewStarterClusterService(client).List(context.TODO())
+
+	//then
+	assert.NotNil(t, listErr)
+	assert.Contains(t, listErr.Error(), "500: Internal server error")
 }
 
 func TestStarterClusterServiceOp_Resume(t *testing.T) {
@@ -145,6 +237,37 @@ func TestStarterClusterServiceOp_Resume(t *testing.T) {
 	assert.Equal(t, clusterIdResponse.ClusterId, 427)
 }
 
+func TestStarterClusterServiceOp_Fail_On_Resume(t *testing.T) {
+	//given
+	serveMux := http.NewServeMux()
+	server := httptest.NewServer(serveMux)
+	defer server.Close()
+
+	serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if m := http.MethodPost; m != r.Method {
+			t.Errorf("Request method = %v, expected %v", r.Method, m)
+		}
+		var request GraphQLQuery
+		json.NewDecoder(r.Body).Decode(&request)
+
+		if strings.Contains(request.Query, "resumeCluster") {
+			fmt.Fprint(w, `{"errors":[{"message":"500: Internal server error"}],"data":{"response":null}}`)
+		} else {
+			fmt.Fprint(w, `{"data":{"response":{"token":"token"}}}`)
+		}
+
+	})
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.ClusterResumeInput{}
+
+	//when
+	_, _, resumeErr := NewStarterClusterService(client).Resume(context.TODO(), request)
+
+	//then
+	assert.NotNil(t, resumeErr)
+	assert.Contains(t, resumeErr.Error(), "500: Internal server error")
+}
+
 func TestStarterClusterServiceOp_Stop(t *testing.T) {
 	//given
 	serveMux := http.NewServeMux()
@@ -175,6 +298,37 @@ func TestStarterClusterServiceOp_Stop(t *testing.T) {
 	assert.Equal(t, clusterIdResponse.ClusterId, 427)
 }
 
+func TestStarterClusterServiceOp_Fail_On_Stop(t *testing.T) {
+	//given
+	serveMux := http.NewServeMux()
+	server := httptest.NewServer(serveMux)
+	defer server.Close()
+
+	serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if m := http.MethodPost; m != r.Method {
+			t.Errorf("Request method = %v, expected %v", r.Method, m)
+		}
+		var request GraphQLQuery
+		json.NewDecoder(r.Body).Decode(&request)
+
+		if strings.Contains(request.Query, "stopCluster") {
+			fmt.Fprint(w, `{"errors":[{"message":"500: Internal server error"}],"data":{"response":null}}`)
+		} else {
+			fmt.Fprint(w, `{"data":{"response":{"token":"token"}}}`)
+		}
+
+	})
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.ClusterStopInput{}
+
+	//when
+	_, _, stopErr := NewStarterClusterService(client).Stop(context.TODO(), request)
+
+	//then
+	assert.NotNil(t, stopErr)
+	assert.Contains(t, stopErr.Error(), "500: Internal server error")
+}
+
 func TestStarterClusterServiceOp_Delete(t *testing.T) {
 	//given
 	serveMux := http.NewServeMux()
@@ -203,6 +357,37 @@ func TestStarterClusterServiceOp_Delete(t *testing.T) {
 
 	//then
 	assert.Equal(t, clusterIdResponse.ClusterId, 427)
+}
+
+func TestStarterClusterServiceOp_Fail_On_Delete(t *testing.T) {
+	//given
+	serveMux := http.NewServeMux()
+	server := httptest.NewServer(serveMux)
+	defer server.Close()
+
+	serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if m := http.MethodPost; m != r.Method {
+			t.Errorf("Request method = %v, expected %v", r.Method, m)
+		}
+		var request GraphQLQuery
+		json.NewDecoder(r.Body).Decode(&request)
+
+		if strings.Contains(request.Query, "deleteCluster") {
+			fmt.Fprint(w, `{"errors":[{"message":"500: Internal server error"}],"data":{"response":null}}`)
+		} else {
+			fmt.Fprint(w, `{"data":{"response":{"token":"token"}}}`)
+		}
+
+	})
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.ClusterDeleteInput{}
+
+	//when
+	_, _, deleteErr := NewStarterClusterService(client).Delete(context.TODO(), request)
+
+	//then
+	assert.NotNil(t, deleteErr)
+	assert.Contains(t, deleteErr.Error(), "500: Internal server error")
 }
 
 func ExampleStarterClusterService_create() {
