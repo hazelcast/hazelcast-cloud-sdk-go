@@ -42,6 +42,36 @@ func TestAzurePeeringServiceOp_List(t *testing.T) {
 	assert.Equal(t, (*peerings)[0].Id, "1")
 }
 
+func TestAzurePeeringServiceOp_Fail_On_List(t *testing.T) {
+	//given
+	serveMux := http.NewServeMux()
+	server := httptest.NewServer(serveMux)
+	defer server.Close()
+
+	serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if m := http.MethodPost; m != r.Method {
+			t.Errorf("Request method = %v, expected %v", r.Method, m)
+		}
+		var request GraphQLQuery
+		json.NewDecoder(r.Body).Decode(&request)
+
+		if strings.Contains(request.Query, "azurePeering") {
+			fmt.Fprint(w, `{"errors":[{"message":"500: Internal server error"}],"data":{"response":null}}`)
+		} else {
+			fmt.Fprint(w, `{"data":{"response":{"token":"token"}}}`)
+		}
+
+	})
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+
+	//when
+	_, _, listErr := NewAzurePeeringService(client).List(context.TODO(), &models.ListAzurePeeringsInput{})
+
+	//then
+	assert.NotNil(t, listErr)
+	assert.Contains(t, listErr.Error(), "500: Internal server error")
+}
+
 func TestAzurePeeringServiceOp_GetProperties(t *testing.T) {
 	//given
 	serveMux := http.NewServeMux()
@@ -76,6 +106,36 @@ func TestAzurePeeringServiceOp_GetProperties(t *testing.T) {
 	assert.Equal(t, (*peeringProperties).ResourceGroupName, "6")
 }
 
+func TestAzurePeeringServiceOp_Fail_On_GetProperties(t *testing.T) {
+	//given
+	serveMux := http.NewServeMux()
+	server := httptest.NewServer(serveMux)
+	defer server.Close()
+
+	serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if m := http.MethodPost; m != r.Method {
+			t.Errorf("Request method = %v, expected %v", r.Method, m)
+		}
+		var request GraphQLQuery
+		json.NewDecoder(r.Body).Decode(&request)
+
+		if strings.Contains(request.Query, "azurePeeringProperties") {
+			fmt.Fprint(w, `{"errors":[{"message":"500: Internal server error"}],"data":{"response":null}}`)
+		} else {
+			fmt.Fprint(w, `{"data":{"response":{"token":"token"}}}`)
+		}
+
+	})
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+
+	//when
+	_, _, acceptErr := NewAzurePeeringService(client).GetProperties(context.TODO(), &models.GetAzurePeeringPropertiesInput{})
+
+	//then
+	assert.NotNil(t, acceptErr)
+	assert.Contains(t, acceptErr.Error(), "500: Internal server error")
+}
+
 func TestAzurePeeringServiceOp_Delete(t *testing.T) {
 	//given
 	serveMux := http.NewServeMux()
@@ -103,4 +163,34 @@ func TestAzurePeeringServiceOp_Delete(t *testing.T) {
 
 	//then
 	assert.Equal(t, (*deleteResult).Status, "OK")
+}
+
+func TestAzurePeeringServiceOp_Fail_On_Delete(t *testing.T) {
+	//given
+	serveMux := http.NewServeMux()
+	server := httptest.NewServer(serveMux)
+	defer server.Close()
+
+	serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if m := http.MethodPost; m != r.Method {
+			t.Errorf("Request method = %v, expected %v", r.Method, m)
+		}
+		var request GraphQLQuery
+		json.NewDecoder(r.Body).Decode(&request)
+
+		if strings.Contains(request.Query, "deleteAzurePeering") {
+			fmt.Fprint(w, `{"errors":[{"message":"500: Internal server error"}],"data":{"response":null}}`)
+		} else {
+			fmt.Fprint(w, `{"data":{"response":{"token":"token"}}}`)
+		}
+
+	})
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+
+	//when
+	_, _, deleteErr := NewAzurePeeringService(client).Delete(context.TODO(), &models.DeleteAzurePeeringInput{})
+
+	//then
+	assert.NotNil(t, deleteErr)
+	assert.Contains(t, deleteErr.Error(), "500: Internal server error")
 }
