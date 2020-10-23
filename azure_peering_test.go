@@ -26,7 +26,7 @@ func TestAzurePeeringServiceOp_List(t *testing.T) {
 		json.NewDecoder(r.Body).Decode(&request)
 
 		if strings.Contains(request.Query, "azurePeering") {
-			fmt.Fprint(w, `{"data":{"response":[{"id":"1"}]}}`)
+			fmt.Fprint(w, `{"data":{"response":[{"id":"1","vpcId":"2","vpcCidr":"3"}]}}`)
 		} else {
 			fmt.Fprint(w, `{"data":{"response":{"token":"token"}}}`)
 		}
@@ -40,6 +40,8 @@ func TestAzurePeeringServiceOp_List(t *testing.T) {
 	//then
 	assert.Len(t, *peerings, 1)
 	assert.Equal(t, (*peerings)[0].Id, "1")
+	assert.Equal(t, (*peerings)[0].VpcId, "2")
+	assert.Equal(t, (*peerings)[0].VpcCidr, "3")
 }
 
 func TestAzurePeeringServiceOp_Fail_On_List(t *testing.T) {

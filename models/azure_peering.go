@@ -13,6 +13,8 @@ type DeleteAzurePeeringInput struct {
 //Type of AzurePeering list object
 type AzurePeering struct {
 	Id string `json:"id"`
+	VpcId string `json:"VpcId"`
+	VpcCidr string `json:"VpcCidr"`
 }
 
 //Type of GetAzurePeeringPropertiesInput to get properties
