@@ -274,7 +274,7 @@ func ExampleEnterpriseClusterService_create() {
 		Name:                  "enterprise-cluster",
 		CloudProvider:         "aws",
 		Region:                "us-east-2",
-		ZonesType:             models.ZoneTypeSingle,
+		ZoneType:              models.ZoneTypeSingle,
 		InstanceType:          "m5.large",
 		InstancePerZone:       1,
 		HazelcastVersion:      "3.12.6",

@@ -158,7 +158,7 @@ type CreateEnterpriseClusterInput struct {
 	//Name of the region.
 	Region string `json:"region"`
 	//Zone type of the cluster.
-	ZonesType ZoneType `json:"zoneType"`
+	ZoneType ZoneType `json:"zoneType"`
 	//Instance type of the cluster
 	InstanceType string `json:"instanceType"`
 	//Number of Hazelcast cluster members per zone.
