@@ -30,6 +30,14 @@ const (
 	Version40  StarterHazelcastVersion = "VERSION_4_0"
 )
 
+//Zone topology type for enterprise Hazelcast Cloud clusters
+type ZoneType string
+
+const (
+	ZoneTypeSingle   ZoneType = "MULTI"
+	ZoneTypeMultiple ZoneType = "SINGLE"
+)
+
 //Eviction policy to be applied when the size of map grows larger than the value specified by the Max Size element described below. For more information, see [Eviction Policy](https://docs.cloud.hazelcast.com/docs/map-configurations#eviction-policy)
 type EvictionPolicy string
 
@@ -149,8 +157,8 @@ type CreateEnterpriseClusterInput struct {
 	CloudProvider string `json:"cloudProvider"`
 	//Name of the region.
 	Region string `json:"region"`
-	//Availability zones of the region.
-	Zones []string `json:"zones"`
+	//Zone type of the cluster.
+	ZonesType ZoneType `json:"zoneType"`
 	//Instance type of the cluster
 	InstanceType string `json:"instanceType"`
 	//Number of Hazelcast cluster members per zone.
