@@ -34,8 +34,8 @@ const (
 type ZoneType string
 
 const (
-	ZoneTypeSingle   ZoneType = "MULTI"
-	ZoneTypeMultiple ZoneType = "SINGLE"
+	ZoneTypeSingle   ZoneType = "SINGLE"
+	ZoneTypeMultiple ZoneType = "MULTI"
 )
 
 //Eviction policy to be applied when the size of map grows larger than the value specified by the Max Size element described below. For more information, see [Eviction Policy](https://docs.cloud.hazelcast.com/docs/map-configurations#eviction-policy)
