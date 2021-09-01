@@ -54,7 +54,6 @@ type Client struct {
 	EnterpriseCluster EnterpriseClusterService
 	CloudProvider     CloudProviderService
 	Region            RegionService
-	AvailabilityZone  AvailabilityZoneService
 	InstanceType      InstanceTypeService
 	HazelcastVersion  HazelcastVersionService
 	Auth              AuthService
@@ -97,7 +96,6 @@ func NewClient(httpClient *http.Client, options ...Option) *Client {
 	c.EnterpriseCluster = NewEnterpriseClusterService(c)
 	c.CloudProvider = NewCloudProviderService(c)
 	c.Region = NewRegionService(c)
-	c.AvailabilityZone = NewAvailabilityZoneService(c)
 	c.InstanceType = NewInstanceTypeService(c)
 	c.HazelcastVersion = NewHazelcastVersionService(c)
 	c.GcpPeering = NewGcpPeeringService(c)
