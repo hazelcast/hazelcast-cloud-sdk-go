@@ -10,7 +10,6 @@ import (
 	"github.com/hazelcast/hazelcast-cloud-sdk-go/models"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -54,7 +53,6 @@ type Client struct {
 	EnterpriseCluster EnterpriseClusterService
 	CloudProvider     CloudProviderService
 	Region            RegionService
-	AvailabilityZone  AvailabilityZoneService
 	InstanceType      InstanceTypeService
 	HazelcastVersion  HazelcastVersionService
 	Auth              AuthService
@@ -97,7 +95,6 @@ func NewClient(httpClient *http.Client, options ...Option) *Client {
 	c.EnterpriseCluster = NewEnterpriseClusterService(c)
 	c.CloudProvider = NewCloudProviderService(c)
 	c.Region = NewRegionService(c)
-	c.AvailabilityZone = NewAvailabilityZoneService(c)
 	c.InstanceType = NewInstanceTypeService(c)
 	c.HazelcastVersion = NewHazelcastVersionService(c)
 	c.GcpPeering = NewGcpPeeringService(c)
@@ -202,7 +199,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*Res
 		} else {
 			var objectMap map[string]interface{}
 			if err := json.Unmarshal(responseData, &objectMap); err != nil {
-				log.Fatal(err)
+				return response, err
 			}
 			dataMarshall, _ := json.Marshal(objectMap["data"].(map[string]interface{})["response"])
 			decodeErr := json.NewDecoder(bytes.NewReader(dataMarshall)).Decode(v)
@@ -232,7 +229,7 @@ func AugmentResponse(response *http.Response) ([]byte, error) {
 
 	var objectMap map[string]interface{}
 	if err := json.Unmarshal(responseData, &objectMap); err != nil {
-		log.Fatal(err)
+		return responseData, fmt.Errorf("%v\n%s", err, string(responseData))
 	}
 
 	errorObject, errorKeyFound := objectMap["errors"]
@@ -242,12 +239,12 @@ func AugmentResponse(response *http.Response) ([]byte, error) {
 
 	errorObjectJson, errorObjectJsonErr := json.Marshal(errorObject)
 	if errorObjectJsonErr != nil {
-		log.Fatal(errorObjectJsonErr)
+		return responseData, errorObjectJsonErr
 	}
 
 	var errorResponse []ErrorResponse
 	if errorUnmarshal := json.Unmarshal(errorObjectJson, &errorResponse); errorUnmarshal != nil {
-		log.Fatal(errorUnmarshal)
+		return responseData, errorUnmarshal
 	}
 
 	firstError := &errorResponse[0]
@@ -262,7 +259,8 @@ func (r *ErrorResponse) Error() string {
 		return fmt.Sprintf("Method:%v URL:%v: Status:%d TraceId:%s Message:%v",
 			r.Response.Request.Method, r.Response.Request.URL, r.Response.StatusCode, r.CorrelationId, r.Message)
 	}
-	return fmt.Sprintf("Method:%v URL:%v: Status:%d Message:%v", r.Response.Request.Method, r.Response.Request.URL, r.Response.StatusCode, r.Message)
+	return fmt.Sprintf("Method:%v URL:%v: Status:%d Message:%v", r.Response.Request.Method, r.Response.Request.URL,
+		r.Response.StatusCode, r.Message)
 }
 
 //Error response is the main type of response for the errors this library handles
