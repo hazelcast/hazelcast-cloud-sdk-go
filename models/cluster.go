@@ -26,9 +26,11 @@ const (
 type StarterHazelcastVersion string
 
 const (
-	Version312 StarterHazelcastVersion = "VERSION_3_12"
-	Version40  StarterHazelcastVersion = "VERSION_4_0"
-	Version42  StarterHazelcastVersion = "VERSION_4_2"
+	Version312 StarterHazelcastVersion = "3.12"
+	Version40  StarterHazelcastVersion = "4.0"
+	Version41  StarterHazelcastVersion = "4.1"
+	Version42  StarterHazelcastVersion = "4.2"
+	Version50  StarterHazelcastVersion = "5.0"
 )
 
 //Zone topology type for enterprise Hazelcast Cloud clusters
