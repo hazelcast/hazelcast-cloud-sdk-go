@@ -193,6 +193,8 @@ type Cluster struct {
 	CustomerId int `json:"customerId"`
 	//Name of the cluster.
 	Name string `json:"name"`
+	//ReleaseName of the cluster than you can use for group name.
+	ReleaseName string `json:"releaseName"`
 	//Password of the cluster.
 	Password string `json:"password"`
 	//Port of the Hazelcast IMDG on the cluster.
