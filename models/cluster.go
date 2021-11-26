@@ -22,17 +22,6 @@ const (
 	Enterprise ProductTypeName = "ENTERPRISE"
 )
 
-//Hazelcast version for starter versions of Hazelcast Cloud clusters
-type StarterHazelcastVersion string
-
-const (
-	Version312 StarterHazelcastVersion = "3.12"
-	Version40  StarterHazelcastVersion = "4.0"
-	Version41  StarterHazelcastVersion = "4.1"
-	Version42  StarterHazelcastVersion = "4.2"
-	Version50  StarterHazelcastVersion = "5.0"
-)
-
 //Zone topology type for enterprise Hazelcast Cloud clusters
 type ZoneType string
 
@@ -128,7 +117,7 @@ type CreateStarterClusterInput struct {
 	//Cluster type of the cluster
 	ClusterType StarterClusterType `json:"clusterType"`
 	//Hazelcast IMDG version of the cluster.
-	HazelcastVersion StarterHazelcastVersion `json:"hazelcastVersion"`
+	HazelcastVersion string `json:"hazelcastVersion"`
 	//Total memory of the cluster.
 	TotalMemory float64 `json:"totalMemory"`
 	//Shows if auto scaling feature enabled or not.
