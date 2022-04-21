@@ -1,17 +1,21 @@
 package models
 
-//Type of cluster types for starter cluster.
-type StarterClusterType string
+// ClusterType represents the type of the cluster.
+type ClusterType string
 
 const (
-	// This type represents Free Cluster.
-	Free StarterClusterType = "FREE"
-	// This type represents Small Cluster.
-	Small StarterClusterType = "SMALL"
-	// This type represents Medium Cluster.
-	Medium StarterClusterType = "MEDIUM"
-	// This type represents Large Cluster.
-	Large StarterClusterType = "LARGE"
+	// Free cluster type.
+	Free ClusterType = "FREE"
+	// Small cluster type.
+	Small ClusterType = "SMALL"
+	// Medium cluster type.
+	Medium ClusterType = "MEDIUM"
+	// Large cluster type.
+	Large ClusterType = "LARGE"
+	// Serverless cluster type.
+	Serverless ClusterType = "SERVERLESS"
+	// Devmode cluster type.
+	Devmode ClusterType = "DEVMODE"
 )
 
 //Product type Hazelcast Cloud clusters
@@ -115,7 +119,7 @@ type CreateStarterClusterInput struct {
 	//Name of the region.
 	Region string `json:"region"`
 	//Cluster type of the cluster
-	ClusterType StarterClusterType `json:"clusterType"`
+	ClusterType ClusterType `json:"clusterType"`
 	//Hazelcast IMDG version of the cluster.
 	HazelcastVersion string `json:"hazelcastVersion"`
 	//Total memory of the cluster.
@@ -134,6 +138,16 @@ type CreateStarterClusterInput struct {
 	IPWhitelist []string `json:"ipWhitelist"`
 	//Data structure configuration of the cluster.
 	DataStructure DataStructureInput `json:"dataStructures"`
+}
+
+// CreateServerlessClusterInput represents input parameters set for serverless cluster creation.
+type CreateServerlessClusterInput struct {
+	// Name of the cluster.
+	Name string `json:"name"`
+	// Name of the region.
+	Region string `json:"region"`
+	// Type of the cluster
+	ClusterType ClusterType `json:"clusterType"`
 }
 
 //The input for Get Cluster.
