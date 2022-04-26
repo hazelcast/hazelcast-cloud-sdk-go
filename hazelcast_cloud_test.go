@@ -1,8 +1,11 @@
 package hazelcastcloud
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/hazelcast/hazelcast-cloud-sdk-go/models"
 	"github.com/stretchr/testify/assert"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -105,4 +108,34 @@ func TestNewFromCredentials_Return_Nil_Client_When_Login_Response_Is_Not_Valid(t
 	assert.Equal(t, "200 OK", errorResponse.Response.Status)
 	assert.Equal(t, "", errorResponse.CorrelationId)
 	server.Close()
+}
+
+func TestNewUploadFileRequest(t *testing.T) {
+	// given
+	client := NewClient(nil)
+	args := models.UploadArtifactArgs{
+		ClusterId: "12345",
+	}
+	req := models.GraphqlRequest{
+		Operation: models.Mutation,
+		Name:      "uploadCustomClassArtifact",
+		Args:      args,
+		Response:  models.UploadedArtifact{},
+		UploadFile: models.UploadFile{
+			FileName: "test.txt",
+			Content:  bytes.NewBufferString("Hello"),
+		},
+	}
+
+	// given
+	request, _ := client.NewUploadFileRequest(&req)
+
+	// then
+	bodyBuf := new(bytes.Buffer)
+	io.Copy(bodyBuf, request.Body)
+	bodyString := bodyBuf.String()
+	print(bodyString)
+	assert.Contains(t, bodyString, "{\"query\":\"mutation ($file: Upload) { uploadCustomClassArtifact(file: $file, clusterId:\\\"12345\\\") {id,name,status} }\",\"variables\":{\"file\":null}}")
+	assert.Contains(t, bodyString, "{ \"0\": [\"variables.file\"] }")
+	assert.Contains(t, bodyString, "Hello")
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/hazelcast/hazelcast-cloud-sdk-go/models"
 	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
@@ -26,7 +27,7 @@ const (
 	// This is the User-Agent of Client.
 	userAgent = "hazelcast-cloud-sdk-go/" + libraryVersion
 	// This is the Http Accept type.
-	mediaType = "application/json"
+	jsonMediaType = "application/json"
 	// This is the header key of total Rate Limit.
 	headerRateLimit = "X-RateLimit-Limit"
 	// This is the header key of total Rate Remaining.
@@ -156,8 +157,51 @@ func (c *Client) NewRequest(body *models.GraphqlRequest) (*http.Request, error) 
 		return nil, requestErr
 	}
 
-	req.Header.Add("Content-Type", mediaType)
-	req.Header.Add("Accept", mediaType)
+	req.Header.Add("Content-Type", jsonMediaType)
+	req.Header.Add("Accept", jsonMediaType)
+	req.Header.Add("User-Agent", c.UserAgent)
+	if c.Token != "" {
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.Token))
+	}
+	return req, nil
+}
+
+func (c *Client) NewUploadFileRequest(request *models.GraphqlRequest) (*http.Request, error) {
+	graphqlBody := GraphQLQuery{
+		OperationName: "",
+		Query:         graphql.QueryUploadFile(request.Name, request.Operation, request.Args, request.Response),
+		Variables:     map[string]interface{}{"file": nil},
+	}
+
+	bufQuery := new(bytes.Buffer)
+	encodeErr := json.NewEncoder(bufQuery).Encode(graphqlBody)
+	if encodeErr != nil {
+		return nil, encodeErr
+	}
+
+	fileContent, contentErr := ioutil.ReadAll(request.UploadFile.Content)
+	if contentErr != nil {
+		return nil, contentErr
+	}
+
+	body := new(bytes.Buffer)
+	writer := multipart.NewWriter(body)
+	writer.WriteField("operations", bufQuery.String())
+	writer.WriteField("map", "{ \"0\": [\"variables.file\"] }")
+	part, err := writer.CreateFormFile("0", request.UploadFile.FileName)
+	if err != nil {
+		return nil, err
+	}
+	part.Write(fileContent)
+	writer.Close()
+
+	req, requestErr := http.NewRequest(http.MethodPost, c.BaseURL.String(), body)
+	if requestErr != nil {
+		return nil, requestErr
+	}
+
+	req.Header.Add("Content-Type", writer.FormDataContentType())
+	req.Header.Add("Accept", jsonMediaType)
 	req.Header.Add("User-Agent", c.UserAgent)
 	if c.Token != "" {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.Token))

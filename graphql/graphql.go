@@ -33,6 +33,14 @@ func Query(name string, operation models.GraphqlOperation, input interface{}, ar
 	}
 }
 
+func QueryUploadFile(name string, operation models.GraphqlOperation, args interface{}, response interface{}) string {
+	return fmt.Sprintf("%s ($file: Upload) { response:%s(file: $file, %s) %s }",
+		operation,
+		name,
+		argumentsBuilder(args),
+		responseBuilder(response))
+}
+
 //This function creates response string from interface for graphql query
 func responseBuilder(value interface{}) string {
 	var stringBuilder strings.Builder
