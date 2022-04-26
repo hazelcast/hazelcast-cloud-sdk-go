@@ -135,7 +135,7 @@ func TestNewUploadFileRequest(t *testing.T) {
 	io.Copy(bodyBuf, request.Body)
 	bodyString := bodyBuf.String()
 	print(bodyString)
-	assert.Contains(t, bodyString, "{\"query\":\"mutation ($file: Upload) { uploadCustomClassArtifact(file: $file, clusterId:\\\"12345\\\") {id,name,status} }\",\"variables\":{\"file\":null}}")
-	assert.Contains(t, bodyString, "{ \"0\": [\"variables.file\"] }")
-	assert.Contains(t, bodyString, "Hello")
+	assert.Contains(t, bodyString, `{ "0": ["variables.file"] }`)
+	assert.Contains(t, bodyString, `Hello`)
+	assert.Contains(t, bodyString, `{"query":"mutation ($file: Upload) { response:uploadCustomClassArtifact(file: $file, clusterId:\"12345\") {id,name,status} }","variables":{"file":null}}`)
 }
