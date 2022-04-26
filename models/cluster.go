@@ -140,6 +140,11 @@ type CreateStarterClusterInput struct {
 	DataStructure DataStructureInput `json:"dataStructures"`
 }
 
+//The input for Get Cluster.
+type GetStarterClusterInput struct {
+	ClusterId string `json:"clusterId"`
+}
+
 // CreateServerlessClusterInput represents input parameters set for serverless cluster creation.
 type CreateServerlessClusterInput struct {
 	// Name of the cluster.
@@ -150,8 +155,8 @@ type CreateServerlessClusterInput struct {
 	ClusterType ClusterType `json:"clusterType"`
 }
 
-//The input for Get Cluster.
-type GetStarterClusterInput struct {
+// GetServerlessClusterInput represents input parameters set for serverless cluster retrieval.
+type GetServerlessClusterInput struct {
 	ClusterId string `json:"clusterId"`
 }
 

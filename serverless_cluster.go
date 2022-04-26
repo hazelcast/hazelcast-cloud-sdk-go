@@ -32,8 +32,32 @@ func (svc ServerlessClusterService) Create(ctx context.Context, input *models.Cr
 
 	resp, err := svc.client.Do(ctx, req, &cluster)
 	if err != nil {
-		return nil, resp, err
+		return nil, nil, err
 	}
 
-	return &cluster, nil, nil
+	return &cluster, resp, nil
+}
+
+func (svc ServerlessClusterService) List(ctx context.Context) (*[]models.Cluster, *Response, error) {
+	var clusterList []models.Cluster
+	graphqlRequest := models.GraphqlRequest{
+		Name:      "clusters",
+		Operation: models.Query,
+		Input:     nil,
+		Args: models.ClusterListInput{
+			ProductType: models.Starter,
+		},
+		Response: clusterList,
+	}
+	req, err := svc.client.NewRequest(&graphqlRequest)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := svc.client.Do(ctx, req, &clusterList)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &clusterList, resp, err
 }

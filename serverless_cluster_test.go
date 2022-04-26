@@ -13,14 +13,15 @@ import (
 )
 
 const (
-	testClusterId       = "1"
-	testCustomerId      = 10
-	testClusterName     = "test-cluster"
-	testClusterPassword = "hidden"
-	testClusterPort     = 30000
-	testClusterVersion  = "5.1.1"
-	testClusterRegion   = "us-west-2"
-	testClusterType     = models.Serverless
+	testClusterId           = "1"
+	testCustomerId          = 10
+	testClusterName         = "test-cluster"
+	testClusterPassword     = "hidden"
+	testClusterPort         = 30000
+	testClusterVersion      = "5.1.1"
+	testClusterRegion       = "us-west-2"
+	testClusterType         = models.Serverless
+	testClusterRunningState = "RUNNING"
 )
 
 var createServerlessClusterRequest = models.CreateServerlessClusterInput{
@@ -66,6 +67,35 @@ func TestServerlessClusterService_Fail_On_Create(t *testing.T) {
 	assert.Contains(t, createErr.Error(), "Internal server error")
 }
 
+func TestServerlessClusterService_List(t *testing.T) {
+	//given
+	server := workingMockServer(t)
+	defer server.Close()
+
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+
+	//when
+	clusterResponses, _, _ := NewServerlessClusterService(client).List(context.TODO())
+
+	//then
+	assert.Len(t, *(clusterResponses), 2)
+}
+
+func TestServerlessClusterService_Fail_On_List(t *testing.T) {
+	//given
+	server := failingMockServer(t)
+	defer server.Close()
+
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+
+	//when
+	_, _, listErr := NewServerlessClusterService(client).List(context.TODO())
+
+	//then
+	assert.NotNil(t, listErr)
+	assert.Contains(t, listErr.Error(), "Internal server error")
+}
+
 func workingMockServer(t *testing.T) *httptest.Server {
 	serveMux := http.NewServeMux()
 	server := httptest.NewServer(serveMux)
@@ -76,11 +106,20 @@ func workingMockServer(t *testing.T) *httptest.Server {
 		var request GraphQLQuery
 		json.NewDecoder(r.Body).Decode(&request)
 
-		if strings.Contains(request.Query, "createServerlessCluster") {
+		switch {
+		case strings.Contains(request.Query, "cluster"):
+			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_get_response.json")
+			assert.NoError(t, responseFileErr)
+			w.Write(responseData)
+		case strings.Contains(request.Query, "clusters"):
+			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_list_response.json")
+			assert.NoError(t, responseFileErr)
+			w.Write(responseData)
+		case strings.Contains(request.Query, "createServerlessCluster"):
 			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_create_response.json")
 			assert.NoError(t, responseFileErr)
 			w.Write(responseData)
-		} else {
+		default:
 			responseData, responseFileErr := ioutil.ReadFile("testdata/access_token_response.json")
 			assert.NoError(t, responseFileErr)
 			w.Write(responseData)
