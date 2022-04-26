@@ -21,7 +21,7 @@ const (
 	testClusterVersion      = "5.1.1"
 	testClusterRegion       = "us-west-2"
 	testClusterType         = models.Serverless
-	testClusterRunningState = "RUNNING"
+	testClusterRunningState = models.Running
 )
 
 var createServerlessClusterRequest = models.CreateServerlessClusterInput{
@@ -96,6 +96,48 @@ func TestServerlessClusterService_Fail_On_List(t *testing.T) {
 	assert.Contains(t, listErr.Error(), "Internal server error")
 }
 
+func TestServerlessClusterService_Get(t *testing.T) {
+	//given
+	server := workingMockServer(t)
+	defer server.Close()
+
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.GetServerlessClusterInput{}
+
+	//when
+	clusterResponse, _, _ := NewServerlessClusterService(client).Get(context.TODO(), request)
+
+	//then
+	assert.Equal(t, (*clusterResponse).Id, testClusterId)
+	assert.Equal(t, (*clusterResponse).CustomerId, testCustomerId)
+	assert.Equal(t, (*clusterResponse).Name, testClusterName)
+	assert.Equal(t, (*clusterResponse).Password, testClusterPassword)
+	assert.Equal(t, (*clusterResponse).Port, testClusterPort)
+	assert.Equal(t, (*clusterResponse).HazelcastVersion, testClusterVersion)
+	assert.True(t, (*clusterResponse).IsAutoScalingEnabled)
+	assert.True(t, (*clusterResponse).IsHotBackupEnabled)
+	assert.True(t, (*clusterResponse).IsHotRestartEnabled)
+	assert.False(t, (*clusterResponse).IsIpWhitelistEnabled)
+	assert.True(t, (*clusterResponse).IsTlsEnabled)
+	assert.Equal(t, (*clusterResponse).State, testClusterRunningState)
+}
+
+func TestServerlessClusterService_Fail_On_Get(t *testing.T) {
+	//given
+	server := failingMockServer(t)
+	defer server.Close()
+
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.GetServerlessClusterInput{}
+
+	//when
+	_, _, getError := NewServerlessClusterService(client).Get(context.TODO(), request)
+
+	//then
+	assert.NotNil(t, getError)
+	assert.Contains(t, getError.Error(), "Internal server error")
+}
+
 func workingMockServer(t *testing.T) *httptest.Server {
 	serveMux := http.NewServeMux()
 	server := httptest.NewServer(serveMux)
@@ -107,16 +149,16 @@ func workingMockServer(t *testing.T) *httptest.Server {
 		json.NewDecoder(r.Body).Decode(&request)
 
 		switch {
-		case strings.Contains(request.Query, "cluster"):
-			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_get_response.json")
+		case strings.Contains(request.Query, "createServerlessCluster"):
+			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_create_response.json")
 			assert.NoError(t, responseFileErr)
 			w.Write(responseData)
 		case strings.Contains(request.Query, "clusters"):
 			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_list_response.json")
 			assert.NoError(t, responseFileErr)
 			w.Write(responseData)
-		case strings.Contains(request.Query, "createServerlessCluster"):
-			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_create_response.json")
+		case strings.Contains(request.Query, "cluster"):
+			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_get_response.json")
 			assert.NoError(t, responseFileErr)
 			w.Write(responseData)
 		default:

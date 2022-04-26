@@ -61,3 +61,25 @@ func (svc ServerlessClusterService) List(ctx context.Context) (*[]models.Cluster
 
 	return &clusterList, resp, err
 }
+
+func (svc ServerlessClusterService) Get(ctx context.Context, input *models.GetServerlessClusterInput) (*models.Cluster, *Response, error) {
+	var cluster models.Cluster
+	var graphqlRequest = models.GraphqlRequest{
+		Name:      "cluster",
+		Operation: models.Query,
+		Input:     nil,
+		Args:      *input,
+		Response:  cluster,
+	}
+	req, err := svc.client.NewRequest(&graphqlRequest)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := svc.client.Do(ctx, req, &cluster)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &cluster, resp, err
+}
