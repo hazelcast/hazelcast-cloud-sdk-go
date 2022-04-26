@@ -237,6 +237,11 @@ type Cluster struct {
 		//This field shows that if the product is free to use.
 		IsFree bool `json:"isFree"`
 	} `json:"productType"`
+	// ClusterType represents the type of the cluster.
+	ClusterType struct {
+		// Name of the cluster type.
+		Name ClusterType `json:"name"`
+	} `json:"clusterType"`
 	//State of the cluster that show current status.
 	State State `json:"state"`
 	//Date that shows when cluster was created.
