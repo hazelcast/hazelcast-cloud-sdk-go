@@ -132,14 +132,14 @@ func TestGraphqlUploadFile(t *testing.T) {
 	name := "queryName"
 	query := models.Mutation
 	response := models.UploadedArtifact{}
-	args := models.UploadArtifactInput{
+	args := models.UploadArtifactArgs{
 		ClusterId: "1234",
 	}
 	//when
 	queryString := QueryUploadFile(name, query, args, response)
 
 	//then
-	assert.Equal(t, "query{response:queryName{clusterId}}", queryString)
+	assert.Equal(t, `mutation ($file: Upload) { response:queryName(file: $file, clusterId:"1234") {id,name,status} }`, queryString)
 }
 
 type ExampleModel struct {
