@@ -8,13 +8,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"strings"
 	"testing"
 )
 
 const (
 	testClusterId           = "1"
+	testClusterIdInt        = 1
 	testCustomerId          = 10
 	testClusterName         = "test-cluster"
 	testClusterPassword     = "hidden"
@@ -151,7 +151,6 @@ func TestServerlessClusterService_Delete(t *testing.T) {
 	clusterResponse, _, _ := NewServerlessClusterService(client).Delete(context.TODO(), request)
 
 	//then
-	testClusterIdInt, _ := strconv.Atoi(testClusterId)
 	assert.Equal(t, (*clusterResponse).ClusterId, testClusterIdInt)
 }
 
@@ -183,7 +182,6 @@ func TestServerlessClusterService_Stop(t *testing.T) {
 	clusterResponse, _, _ := NewServerlessClusterService(client).Stop(context.TODO(), request)
 
 	//then
-	testClusterIdInt, _ := strconv.Atoi(testClusterId)
 	assert.Equal(t, (*clusterResponse).ClusterId, testClusterIdInt)
 }
 
@@ -197,6 +195,37 @@ func TestServerlessClusterService_Fail_On_Stop(t *testing.T) {
 
 	//when
 	_, _, deleteErr := NewServerlessClusterService(client).Stop(context.TODO(), request)
+
+	//then
+	assert.NotNil(t, deleteErr)
+	assert.Contains(t, deleteErr.Error(), "Internal server error")
+}
+
+func TestServerlessClusterService_Resume(t *testing.T) {
+	//given
+	server := workingMockServer(t)
+	defer server.Close()
+
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.ClusterResumeInput{ClusterId: testClusterId}
+
+	//when
+	clusterResponse, _, _ := NewServerlessClusterService(client).Resume(context.TODO(), request)
+
+	//then
+	assert.Equal(t, (*clusterResponse).ClusterId, testClusterIdInt)
+}
+
+func TestServerlessClusterService_Fail_On_Resume(t *testing.T) {
+	//given
+	server := failingMockServer(t)
+	defer server.Close()
+
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.ClusterResumeInput{ClusterId: testClusterId}
+
+	//when
+	_, _, deleteErr := NewServerlessClusterService(client).Resume(context.TODO(), request)
 
 	//then
 	assert.NotNil(t, deleteErr)
@@ -224,6 +253,10 @@ func workingMockServer(t *testing.T) *httptest.Server {
 			w.Write(responseData)
 		case strings.Contains(request.Query, "stopCluster"):
 			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_stop_response.json")
+			assert.NoError(t, responseFileErr)
+			w.Write(responseData)
+		case strings.Contains(request.Query, "resumeCluster"):
+			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_resume_response.json")
 			assert.NoError(t, responseFileErr)
 			w.Write(responseData)
 		case strings.Contains(request.Query, "clusters"):

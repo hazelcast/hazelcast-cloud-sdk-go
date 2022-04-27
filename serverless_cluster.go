@@ -131,3 +131,26 @@ func (svc ServerlessClusterService) Stop(ctx context.Context, input *models.Clus
 
 	return &clusterId, resp, err
 }
+
+// Resume provides the ability to resume a serverless cluster by its ID.
+func (svc ServerlessClusterService) Resume(ctx context.Context, input *models.ClusterResumeInput) (*models.ClusterId, *Response, error) {
+	var clusterId models.ClusterId
+	graphqlRequest := models.GraphqlRequest{
+		Name:      "resumeCluster",
+		Operation: models.Mutation,
+		Input:     nil,
+		Args:      *input,
+		Response:  clusterId,
+	}
+	req, err := svc.client.NewRequest(&graphqlRequest)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := svc.client.Do(ctx, req, &clusterId)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &clusterId, resp, err
+}
