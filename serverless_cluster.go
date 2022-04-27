@@ -38,6 +38,7 @@ func (svc ServerlessClusterService) Create(ctx context.Context, input *models.Cr
 	return &cluster, resp, nil
 }
 
+// List provides the ability to get a list of serverless clusters.
 func (svc ServerlessClusterService) List(ctx context.Context) (*[]models.Cluster, *Response, error) {
 	var clusterList []models.Cluster
 	graphqlRequest := models.GraphqlRequest{
@@ -62,6 +63,7 @@ func (svc ServerlessClusterService) List(ctx context.Context) (*[]models.Cluster
 	return &clusterList, resp, err
 }
 
+// Get retrieves a serverless cluster by its ID.
 func (svc ServerlessClusterService) Get(ctx context.Context, input *models.GetServerlessClusterInput) (*models.Cluster, *Response, error) {
 	var cluster models.Cluster
 	var graphqlRequest = models.GraphqlRequest{
@@ -84,10 +86,34 @@ func (svc ServerlessClusterService) Get(ctx context.Context, input *models.GetSe
 	return &cluster, resp, err
 }
 
+// Delete deletes a serverless cluster by its ID.
 func (svc ServerlessClusterService) Delete(ctx context.Context, input *models.ClusterDeleteInput) (*models.ClusterId, *Response, error) {
 	var clusterId models.ClusterId
 	graphqlRequest := models.GraphqlRequest{
 		Name:      "deleteCluster",
+		Operation: models.Mutation,
+		Input:     nil,
+		Args:      *input,
+		Response:  clusterId,
+	}
+	req, err := svc.client.NewRequest(&graphqlRequest)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := svc.client.Do(ctx, req, &clusterId)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &clusterId, resp, err
+}
+
+// Stop provides the ability to stop a serverless cluster by its ID.
+func (svc ServerlessClusterService) Stop(ctx context.Context, input *models.ClusterStopInput) (*models.ClusterId, *Response, error) {
+	var clusterId models.ClusterId
+	graphqlRequest := models.GraphqlRequest{
+		Name:      "stopCluster",
 		Operation: models.Mutation,
 		Input:     nil,
 		Args:      *input,

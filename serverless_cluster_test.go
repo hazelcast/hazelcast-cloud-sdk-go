@@ -103,7 +103,7 @@ func TestServerlessClusterService_Get(t *testing.T) {
 	defer server.Close()
 
 	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
-	request := &models.GetServerlessClusterInput{}
+	request := &models.GetServerlessClusterInput{ClusterId: testClusterId}
 
 	//when
 	clusterResponse, _, _ := NewServerlessClusterService(client).Get(context.TODO(), request)
@@ -129,7 +129,7 @@ func TestServerlessClusterService_Fail_On_Get(t *testing.T) {
 	defer server.Close()
 
 	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
-	request := &models.GetServerlessClusterInput{}
+	request := &models.GetServerlessClusterInput{ClusterId: testClusterId}
 
 	//when
 	_, _, getError := NewServerlessClusterService(client).Get(context.TODO(), request)
@@ -145,7 +145,7 @@ func TestServerlessClusterService_Delete(t *testing.T) {
 	defer server.Close()
 
 	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
-	request := &models.ClusterDeleteInput{}
+	request := &models.ClusterDeleteInput{ClusterId: testClusterId}
 
 	//when
 	clusterResponse, _, _ := NewServerlessClusterService(client).Delete(context.TODO(), request)
@@ -161,10 +161,42 @@ func TestServerlessClusterService_Fail_On_Delete(t *testing.T) {
 	defer server.Close()
 
 	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
-	request := &models.ClusterDeleteInput{}
+	request := &models.ClusterDeleteInput{ClusterId: testClusterId}
 
 	//when
 	_, _, deleteErr := NewServerlessClusterService(client).Delete(context.TODO(), request)
+
+	//then
+	assert.NotNil(t, deleteErr)
+	assert.Contains(t, deleteErr.Error(), "Internal server error")
+}
+
+func TestServerlessClusterService_Stop(t *testing.T) {
+	//given
+	server := workingMockServer(t)
+	defer server.Close()
+
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.ClusterStopInput{ClusterId: testClusterId}
+
+	//when
+	clusterResponse, _, _ := NewServerlessClusterService(client).Stop(context.TODO(), request)
+
+	//then
+	testClusterIdInt, _ := strconv.Atoi(testClusterId)
+	assert.Equal(t, (*clusterResponse).ClusterId, testClusterIdInt)
+}
+
+func TestServerlessClusterService_Fail_On_Stop(t *testing.T) {
+	//given
+	server := failingMockServer(t)
+	defer server.Close()
+
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.ClusterStopInput{ClusterId: testClusterId}
+
+	//when
+	_, _, deleteErr := NewServerlessClusterService(client).Stop(context.TODO(), request)
 
 	//then
 	assert.NotNil(t, deleteErr)
@@ -188,6 +220,10 @@ func workingMockServer(t *testing.T) *httptest.Server {
 			w.Write(responseData)
 		case strings.Contains(request.Query, "deleteCluster"):
 			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_delete_response.json")
+			assert.NoError(t, responseFileErr)
+			w.Write(responseData)
+		case strings.Contains(request.Query, "stopCluster"):
+			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_stop_response.json")
 			assert.NoError(t, responseFileErr)
 			w.Write(responseData)
 		case strings.Contains(request.Query, "clusters"):
