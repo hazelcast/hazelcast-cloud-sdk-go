@@ -83,3 +83,25 @@ func (svc ServerlessClusterService) Get(ctx context.Context, input *models.GetSe
 
 	return &cluster, resp, err
 }
+
+func (svc ServerlessClusterService) Delete(ctx context.Context, input *models.ClusterDeleteInput) (*models.ClusterId, *Response, error) {
+	var clusterId models.ClusterId
+	graphqlRequest := models.GraphqlRequest{
+		Name:      "deleteCluster",
+		Operation: models.Mutation,
+		Input:     nil,
+		Args:      *input,
+		Response:  clusterId,
+	}
+	req, err := svc.client.NewRequest(&graphqlRequest)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := svc.client.Do(ctx, req, &clusterId)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &clusterId, resp, err
+}

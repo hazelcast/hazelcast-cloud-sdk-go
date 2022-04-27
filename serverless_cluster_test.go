@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -138,6 +139,38 @@ func TestServerlessClusterService_Fail_On_Get(t *testing.T) {
 	assert.Contains(t, getError.Error(), "Internal server error")
 }
 
+func TestServerlessClusterService_Delete(t *testing.T) {
+	//given
+	server := workingMockServer(t)
+	defer server.Close()
+
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.ClusterDeleteInput{}
+
+	//when
+	clusterResponse, _, _ := NewServerlessClusterService(client).Delete(context.TODO(), request)
+
+	//then
+	testClusterIdInt, _ := strconv.Atoi(testClusterId)
+	assert.Equal(t, (*clusterResponse).ClusterId, testClusterIdInt)
+}
+
+func TestServerlessClusterService_Fail_On_Delete(t *testing.T) {
+	//given
+	server := failingMockServer(t)
+	defer server.Close()
+
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.ClusterDeleteInput{}
+
+	//when
+	_, _, deleteErr := NewServerlessClusterService(client).Delete(context.TODO(), request)
+
+	//then
+	assert.NotNil(t, deleteErr)
+	assert.Contains(t, deleteErr.Error(), "Internal server error")
+}
+
 func workingMockServer(t *testing.T) *httptest.Server {
 	serveMux := http.NewServeMux()
 	server := httptest.NewServer(serveMux)
@@ -151,6 +184,10 @@ func workingMockServer(t *testing.T) *httptest.Server {
 		switch {
 		case strings.Contains(request.Query, "createServerlessCluster"):
 			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_create_response.json")
+			assert.NoError(t, responseFileErr)
+			w.Write(responseData)
+		case strings.Contains(request.Query, "deleteCluster"):
+			responseData, responseFileErr := ioutil.ReadFile("testdata/serverless_cluster_delete_response.json")
 			assert.NoError(t, responseFileErr)
 			w.Write(responseData)
 		case strings.Contains(request.Query, "clusters"):

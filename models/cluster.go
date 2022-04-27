@@ -201,7 +201,7 @@ type GetEnterpriseClusterInput struct {
 
 //This response id of the Cluster Response
 type ClusterId struct {
-	ClusterId int `json:"ClusterId"`
+	ClusterId int `json:"clusterId"`
 }
 
 //This response for Cluster
