@@ -49,6 +49,7 @@ type Client struct {
 	rateMutex sync.Mutex
 	Token     string
 
+	ServerlessCluster ServerlessClusterService
 	StarterCluster    StarterClusterService
 	EnterpriseCluster EnterpriseClusterService
 	CloudProvider     CloudProviderService
@@ -91,6 +92,7 @@ func NewClient(httpClient *http.Client, options ...Option) *Client {
 	c := &Client{client: httpClient, BaseURL: baseURL, UserAgent: userAgent}
 
 	c.Auth = NewAuthService(c)
+	c.ServerlessCluster = NewServerlessClusterService(c)
 	c.StarterCluster = NewStarterClusterService(c)
 	c.EnterpriseCluster = NewEnterpriseClusterService(c)
 	c.CloudProvider = NewCloudProviderService(c)
