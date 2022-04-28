@@ -13,9 +13,6 @@ type StarterClusterService interface {
 	Resume(ctx context.Context, request *models.ClusterResumeInput) (*models.ClusterId, *Response, error)
 	Stop(ctx context.Context, request *models.ClusterStopInput) (*models.ClusterId, *Response, error)
 	Delete(ctx context.Context, request *models.ClusterDeleteInput) (*models.ClusterId, *Response, error)
-	ListUploadedArtifacts(ctx context.Context, request *models.ListUploadedArtifactsInput) (*[]models.UploadedArtifact, *Response, error)
-	UploadArtifact(ctx context.Context, request *models.UploadArtifactInput) (*models.UploadedArtifact, *Response, error)
-	DeleteArtifact(ctx context.Context, request *models.DeleteArtifactInput) (*models.UploadedArtifact, *Response, error)
 }
 
 type starterClusterServiceOp struct {
@@ -164,76 +161,4 @@ func (c starterClusterServiceOp) Delete(ctx context.Context, input *models.Clust
 	}
 
 	return &clusterId, resp, err
-}
-
-func (c starterClusterServiceOp) ListUploadedArtifacts(ctx context.Context, request *models.ListUploadedArtifactsInput) (*[]models.UploadedArtifact, *Response, error) {
-	var artifact []models.UploadedArtifact
-	graphqlRequest := models.GraphqlRequest{
-		Name:      "customClasses",
-		Operation: models.Query,
-		Input:     nil,
-		Args:      *request,
-		Response:  artifact,
-	}
-	req, err := c.client.NewRequest(&graphqlRequest)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	resp, err := c.client.Do(ctx, req, &artifact)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return &artifact, nil, nil
-}
-
-func (c starterClusterServiceOp) UploadArtifact(ctx context.Context, request *models.UploadArtifactInput) (*models.UploadedArtifact, *Response, error) {
-	var artifact models.UploadedArtifact
-	graphqlQuery := models.GraphqlRequest{
-		Name:      "uploadCustomClassArtifact",
-		Operation: models.Mutation,
-		Input:     nil,
-		Args: models.UploadArtifactArgs{
-			ClusterId: request.ClusterId,
-		},
-		Response: artifact,
-		UploadFile: models.UploadFile{
-			FileName: request.FileName,
-			Content:  request.Content,
-		},
-	}
-	req, err := c.client.NewUploadFileRequest(&graphqlQuery)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	resp, err := c.client.Do(ctx, req, &artifact)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return &artifact, nil, nil
-}
-
-func (c starterClusterServiceOp) DeleteArtifact(ctx context.Context, request *models.DeleteArtifactInput) (*models.UploadedArtifact, *Response, error) {
-	var artifact models.UploadedArtifact
-	graphqlQuery := models.GraphqlRequest{
-		Name:      "deleteCustomClassArtifact",
-		Operation: models.Mutation,
-		Input:     nil,
-		Args:      *request,
-		Response:  artifact,
-	}
-	req, err := c.client.NewRequest(&graphqlQuery)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	resp, err := c.client.Do(ctx, req, &artifact)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return &artifact, nil, nil
 }
