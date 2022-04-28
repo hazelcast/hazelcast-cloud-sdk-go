@@ -390,6 +390,69 @@ func TestStarterClusterServiceOp_Fail_On_Delete(t *testing.T) {
 	assert.Contains(t, deleteErr.Error(), "500: Internal server error")
 }
 
+func TestStarterClusterServiceOp_ListUploadedArtifacts(t *testing.T) {
+	//given
+	serveMux := http.NewServeMux()
+	server := httptest.NewServer(serveMux)
+	defer server.Close()
+
+	serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if m := http.MethodPost; m != r.Method {
+			t.Errorf("Request method = %v, expected %v", r.Method, m)
+		}
+		var request GraphQLQuery
+		json.NewDecoder(r.Body).Decode(&request)
+		if strings.Contains(request.Query, "customClasses") {
+			fmt.Fprint(w, `{"data": {"response": [{"id": 108, "name": "apple-jdk11.jar", "status": "FINISHED"}]}}`)
+		} else {
+			fmt.Fprint(w, `{"data":{"response":{"token":"token"}}}`)
+		}
+	})
+
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.ListUploadedArtifactsInput{}
+
+	//when
+	list, _, _ := NewStarterClusterService(client).ListUploadedArtifacts(context.TODO(), request)
+
+	// then
+	assert.NotNil(t, list)
+	assert.Len(t, *list, 1)
+	assert.Equal(t, (*list)[0].Id, 108)
+}
+
+func TestStarterClusterServiceOp_DeleteArtifact(t *testing.T) {
+	//given
+	serveMux := http.NewServeMux()
+	server := httptest.NewServer(serveMux)
+	defer server.Close()
+
+	serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if m := http.MethodPost; m != r.Method {
+			t.Errorf("Request method = %v, expected %v", r.Method, m)
+		}
+		var request GraphQLQuery
+		json.NewDecoder(r.Body).Decode(&request)
+		if strings.Contains(request.Query, "deleteCustomClassArtifact") {
+			fmt.Fprint(w, `{"data": {"response": {"id": 108, "name": "apple-jdk11.jar", "status": "FINISHED"}}}`)
+		} else {
+			fmt.Fprint(w, `{"data":{"response":{"token":"token"}}}`)
+		}
+	})
+
+	client, _, _ := NewFromCredentials("apiKey", "apiSecret", OptionEndpoint(server.URL))
+	request := &models.DeleteArtifactInput{
+		ClusterId: "109",
+	}
+
+	//when
+	art, _, _ := NewStarterClusterService(client).DeleteArtifact(context.TODO(), request)
+
+	// then
+	assert.NotNil(t, art)
+	assert.Equal(t, (*art).Id, 108)
+}
+
 func ExampleStarterClusterService_create() {
 	client, _, _ := New()
 	create, _, _ := client.StarterCluster.Create(context.Background(), &models.CreateStarterClusterInput{
