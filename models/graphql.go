@@ -1,12 +1,15 @@
 package models
 
+import "io"
+
 //Type of graphql request
 type GraphqlRequest struct {
-	Operation GraphqlOperation
-	Name      string
-	Input     interface{}
-	Args      interface{}
-	Response  interface{}
+	Operation  GraphqlOperation
+	Name       string
+	Input      interface{}
+	Args       interface{}
+	Response   interface{}
+	UploadFile UploadFile
 }
 
 //Type of graphql operation
@@ -30,4 +33,9 @@ type GraphQLError struct {
 		Line   int `json:"line"`
 		Column int `json:"column"`
 	} `json:"locations"`
+}
+
+type UploadFile struct {
+	FileName string
+	Content  io.Reader
 }

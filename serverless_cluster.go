@@ -154,3 +154,75 @@ func (svc ServerlessClusterService) Resume(ctx context.Context, input *models.Cl
 
 	return &clusterId, resp, err
 }
+
+func (svc ServerlessClusterService) ListUploadedArtifacts(ctx context.Context, request *models.ListUploadedArtifactsInput) (*[]models.UploadedArtifact, *Response, error) {
+	var artifact []models.UploadedArtifact
+	graphqlRequest := models.GraphqlRequest{
+		Name:      "customClasses",
+		Operation: models.Query,
+		Input:     nil,
+		Args:      *request,
+		Response:  artifact,
+	}
+	req, err := svc.client.NewRequest(&graphqlRequest)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := svc.client.Do(ctx, req, &artifact)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return &artifact, nil, nil
+}
+
+func (svc ServerlessClusterService) UploadArtifact(ctx context.Context, request *models.UploadArtifactInput) (*models.UploadedArtifact, *Response, error) {
+	var artifact models.UploadedArtifact
+	graphqlQuery := models.GraphqlRequest{
+		Name:      "uploadCustomClassArtifact",
+		Operation: models.Mutation,
+		Input:     nil,
+		Args: models.UploadArtifactArgs{
+			ClusterId: request.ClusterId,
+		},
+		Response: artifact,
+		UploadFile: models.UploadFile{
+			FileName: request.FileName,
+			Content:  request.Content,
+		},
+	}
+	req, err := svc.client.NewUploadFileRequest(&graphqlQuery)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := svc.client.Do(ctx, req, &artifact)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return &artifact, nil, nil
+}
+
+func (svc ServerlessClusterService) DeleteArtifact(ctx context.Context, request *models.DeleteArtifactInput) (*models.UploadedArtifact, *Response, error) {
+	var artifact models.UploadedArtifact
+	graphqlQuery := models.GraphqlRequest{
+		Name:      "deleteCustomClassArtifact",
+		Operation: models.Mutation,
+		Input:     nil,
+		Args:      *request,
+		Response:  artifact,
+	}
+	req, err := svc.client.NewRequest(&graphqlQuery)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := svc.client.Do(ctx, req, &artifact)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return &artifact, nil, nil
+}

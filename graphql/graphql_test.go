@@ -126,6 +126,22 @@ func TestGraphqlResponseSelector_For_Slice(t *testing.T) {
 		selector)
 }
 
+func TestGraphqlUploadFile(t *testing.T) {
+	//given
+
+	name := "queryName"
+	query := models.Mutation
+	response := models.UploadedArtifact{}
+	args := models.UploadArtifactArgs{
+		ClusterId: "1234",
+	}
+	//when
+	queryString := QueryUploadFile(name, query, args, response)
+
+	//then
+	assert.Equal(t, `mutation ($file: Upload) { response:queryName(file: $file, clusterId:"1234") {id,name,status} }`, queryString)
+}
+
 type ExampleModel struct {
 	Name    string
 	Size    int
