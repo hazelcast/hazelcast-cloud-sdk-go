@@ -16,7 +16,8 @@ func NewServerlessClusterService(client *Client) ServerlessClusterService {
 }
 
 // Create creates a serverless cluster according to configuration provided in the request.
-func (svc ServerlessClusterService) Create(ctx context.Context, input *models.CreateServerlessClusterInput) (*models.Cluster, *Response, error) {
+func (svc ServerlessClusterService) Create(ctx context.Context,
+	input *models.CreateServerlessClusterInput) (*models.Cluster, *Response, error) {
 	var cluster models.Cluster
 	var graphqlRequest = models.GraphqlRequest{
 		Operation: models.Mutation,
@@ -64,7 +65,8 @@ func (svc ServerlessClusterService) List(ctx context.Context) (*[]models.Cluster
 }
 
 // Get retrieves a serverless cluster by its ID.
-func (svc ServerlessClusterService) Get(ctx context.Context, input *models.GetServerlessClusterInput) (*models.Cluster, *Response, error) {
+func (svc ServerlessClusterService) Get(ctx context.Context,
+	input *models.GetServerlessClusterInput) (*models.Cluster, *Response, error) {
 	var cluster models.Cluster
 	var graphqlRequest = models.GraphqlRequest{
 		Name:      "cluster",
@@ -87,7 +89,8 @@ func (svc ServerlessClusterService) Get(ctx context.Context, input *models.GetSe
 }
 
 // Delete deletes a serverless cluster by its ID.
-func (svc ServerlessClusterService) Delete(ctx context.Context, input *models.ClusterDeleteInput) (*models.ClusterId, *Response, error) {
+func (svc ServerlessClusterService) Delete(ctx context.Context,
+	input *models.ClusterDeleteInput) (*models.ClusterId, *Response, error) {
 	var clusterId models.ClusterId
 	graphqlRequest := models.GraphqlRequest{
 		Name:      "deleteCluster",
@@ -110,7 +113,8 @@ func (svc ServerlessClusterService) Delete(ctx context.Context, input *models.Cl
 }
 
 // Stop provides the ability to stop a serverless cluster by its ID.
-func (svc ServerlessClusterService) Stop(ctx context.Context, input *models.ClusterStopInput) (*models.ClusterId, *Response, error) {
+func (svc ServerlessClusterService) Stop(ctx context.Context,
+	input *models.ClusterStopInput) (*models.ClusterId, *Response, error) {
 	var clusterId models.ClusterId
 	graphqlRequest := models.GraphqlRequest{
 		Name:      "stopCluster",
@@ -133,7 +137,8 @@ func (svc ServerlessClusterService) Stop(ctx context.Context, input *models.Clus
 }
 
 // Resume provides the ability to resume a serverless cluster by its ID.
-func (svc ServerlessClusterService) Resume(ctx context.Context, input *models.ClusterResumeInput) (*models.ClusterId, *Response, error) {
+func (svc ServerlessClusterService) Resume(ctx context.Context,
+	input *models.ClusterResumeInput) (*models.ClusterId, *Response, error) {
 	var clusterId models.ClusterId
 	graphqlRequest := models.GraphqlRequest{
 		Name:      "resumeCluster",
@@ -155,7 +160,8 @@ func (svc ServerlessClusterService) Resume(ctx context.Context, input *models.Cl
 	return &clusterId, resp, err
 }
 
-func (svc ServerlessClusterService) ListUploadedArtifacts(ctx context.Context, request *models.ListUploadedArtifactsInput) (*[]models.UploadedArtifact, *Response, error) {
+func (svc ServerlessClusterService) ListUploadedArtifacts(ctx context.Context,
+	request *models.ListUploadedArtifactsInput) (*[]models.UploadedArtifact, *Response, error) {
 	var artifact []models.UploadedArtifact
 	graphqlRequest := models.GraphqlRequest{
 		Name:      "customClasses",
@@ -177,7 +183,8 @@ func (svc ServerlessClusterService) ListUploadedArtifacts(ctx context.Context, r
 	return &artifact, nil, nil
 }
 
-func (svc ServerlessClusterService) UploadArtifact(ctx context.Context, request *models.UploadArtifactInput) (*models.UploadedArtifact, *Response, error) {
+func (svc ServerlessClusterService) UploadArtifact(ctx context.Context,
+	request *models.UploadArtifactInput) (*models.UploadedArtifact, *Response, error) {
 	var artifact models.UploadedArtifact
 	graphqlQuery := models.GraphqlRequest{
 		Name:      "uploadCustomClassArtifact",
@@ -205,12 +212,35 @@ func (svc ServerlessClusterService) UploadArtifact(ctx context.Context, request 
 	return &artifact, nil, nil
 }
 
-func (svc ServerlessClusterService) DeleteArtifact(ctx context.Context, request *models.DeleteArtifactInput) (*models.UploadedArtifact, *Response, error) {
+func (svc ServerlessClusterService) DeleteArtifact(ctx context.Context,
+	request *models.DeleteArtifactInput) (*models.UploadedArtifact, *Response, error) {
 	var artifact models.UploadedArtifact
 	graphqlQuery := models.GraphqlRequest{
 		Name:      "deleteCustomClassArtifact",
 		Operation: models.Mutation,
 		Input:     nil,
+		Args:      *request,
+		Response:  artifact,
+	}
+	req, err := svc.client.NewRequest(&graphqlQuery)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := svc.client.Do(ctx, req, &artifact)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return &artifact, nil, nil
+}
+
+func (svc ServerlessClusterService) DownloadArtifact(ctx context.Context,
+	request *models.DownloadArtifactInput) (*models.UploadedArtifactLink, *Response, error) {
+	var artifact models.UploadedArtifactLink
+	graphqlQuery := models.GraphqlRequest{
+		Name:      "downloadCustomClassesArtifact",
+		Operation: models.Query,
 		Args:      *request,
 		Response:  artifact,
 	}

@@ -21,8 +21,19 @@ type DeleteArtifactInput struct {
 	CustomClassesId string
 }
 
+type DownloadArtifactInput struct {
+	ClusterId       string
+	CustomClassesId string
+}
+
 type UploadedArtifact struct {
 	Id     int    `json:"id"`
 	Name   string `json:"name"`
 	Status string `json:"status"`
+}
+
+type UploadedArtifactLink struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+	Url  string `json:"url"`
 }
