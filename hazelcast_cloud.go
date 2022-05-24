@@ -174,34 +174,37 @@ func (c *Client) NewUploadFileRequest(request *models.GraphqlRequest) (*http.Req
 		Query:         graphql.QueryUploadFile(request.Name, request.Operation, request.Args, request.Response),
 		Variables:     map[string]interface{}{"file": nil},
 	}
-
-	bufQuery := new(bytes.Buffer)
-	encodeErr := json.NewEncoder(bufQuery).Encode(graphqlBody)
-	if encodeErr != nil {
-		return nil, encodeErr
+	query := new(bytes.Buffer)
+	if err := json.NewEncoder(query).Encode(graphqlBody); err != nil {
+		return nil, err
 	}
-
-	fileContent, contentErr := ioutil.ReadAll(request.UploadFile.Content)
-	if contentErr != nil {
-		return nil, contentErr
+	formData := new(bytes.Buffer)
+	writer := multipart.NewWriter(formData)
+	if err := writer.WriteField("operations", query.String()); err != nil {
+		return nil, err
 	}
-
-	body := new(bytes.Buffer)
-	writer := multipart.NewWriter(body)
-	writer.WriteField("operations", bufQuery.String())
-	writer.WriteField("map", "{ \"0\": [\"variables.file\"] }")
-	part, err := writer.CreateFormFile("0", request.UploadFile.FileName)
+	if err := writer.WriteField("map", "{ \"0\": [\"variables.file\"] }"); err != nil {
+		return nil, err
+	}
+	if _, err := writer.CreateFormFile("0", request.UploadFile.FileName); err != nil {
+		return nil, err
+	}
+	begin := make([]byte, formData.Len())
+	if _, err := formData.Read(begin); err != nil {
+		return nil, err
+	}
+	if err := writer.Close(); err != nil {
+		return nil, err
+	}
+	end := make([]byte, formData.Len())
+	if _, err := formData.Read(end); err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, c.BaseURL.String(),
+		io.MultiReader(bytes.NewReader(begin), request.UploadFile.Content, bytes.NewReader(end)))
 	if err != nil {
 		return nil, err
 	}
-	part.Write(fileContent)
-	writer.Close()
-
-	req, requestErr := http.NewRequest(http.MethodPost, c.BaseURL.String(), body)
-	if requestErr != nil {
-		return nil, requestErr
-	}
-
 	req.Header.Add("Content-Type", writer.FormDataContentType())
 	req.Header.Add("Accept", jsonMediaType)
 	req.Header.Add("User-Agent", c.UserAgent)
