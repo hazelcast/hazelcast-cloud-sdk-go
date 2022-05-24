@@ -180,29 +180,32 @@ func (c *Client) NewUploadFileRequest(request *models.GraphqlRequest) (*http.Req
 	if encodeErr != nil {
 		return nil, encodeErr
 	}
-
-	fileContent, contentErr := ioutil.ReadAll(request.UploadFile.Content)
-	if contentErr != nil {
-		return nil, contentErr
-	}
-
-	body := new(bytes.Buffer)
-	writer := multipart.NewWriter(body)
-	writer.WriteField("operations", bufQuery.String())
-	writer.WriteField("map", "{ \"0\": [\"variables.file\"] }")
-	part, err := writer.CreateFormFile("0", request.UploadFile.FileName)
+	formData := new(bytes.Buffer)
+	multipartWriter := multipart.NewWriter(formData)
+	multipartWriter.WriteField("operations", bufQuery.String())
+	multipartWriter.WriteField("map", "{ \"0\": [\"variables.file\"] }")
+	_, err := multipartWriter.CreateFormFile("0", request.UploadFile.FileName)
 	if err != nil {
 		return nil, err
 	}
-	part.Write(fileContent)
-	writer.Close()
+	multi := make([]byte, formData.Len())
+	_, err = formData.Read(multi)
+	if err != nil {
+		return nil, err
+	}
+	multipartWriter.Close()
+	lastBoundary := make([]byte, formData.Len())
+	_, err = formData.Read(lastBoundary)
+	if err != nil {
+		return nil, err
+	}
 
-	req, requestErr := http.NewRequest(http.MethodPost, c.BaseURL.String(), body)
+	req, requestErr := http.NewRequest(http.MethodPost, c.BaseURL.String(),
+		io.MultiReader(bytes.NewReader(multi), request.UploadFile.Content, bytes.NewReader(lastBoundary)))
 	if requestErr != nil {
 		return nil, requestErr
 	}
-
-	req.Header.Add("Content-Type", writer.FormDataContentType())
+	req.Header.Add("Content-Type", multipartWriter.FormDataContentType())
 	req.Header.Add("Accept", jsonMediaType)
 	req.Header.Add("User-Agent", c.UserAgent)
 	if c.Token != "" {
